@@ -131,6 +131,7 @@ def main():
     ckpt_every = train_cfg.get("checkpoint_every", 50)
     ckpt_dir = Path(paths_cfg.get("checkpoint_dir", "checkpoints"))
     ckpt_dir.mkdir(parents=True, exist_ok=True)
+    ckpt_prefix = paths_cfg.get("checkpoint_prefix", "jepa")
 
     # --- MLflow ---
     mlflow_cfg = cfg.get("mlflow", {})
@@ -206,12 +207,12 @@ def main():
             mlflow.log_metric("loss/epoch", avg_loss, step=epoch)
 
             if (epoch + 1) % ckpt_every == 0:
-                ckpt_path = ckpt_dir / f"jepa_ep{epoch+1:04d}.pt"
+                ckpt_path = ckpt_dir / f"{ckpt_prefix}_ep{epoch+1:04d}.pt"
                 save_checkpoint(jepa, optimizer, scaler, epoch, global_step, ckpt_path)
                 print(f"Checkpoint saved: {ckpt_path}")
 
         # Final checkpoint
-        save_checkpoint(jepa, optimizer, scaler, epochs - 1, global_step, ckpt_dir / "jepa_final.pt")
+        save_checkpoint(jepa, optimizer, scaler, epochs - 1, global_step, ckpt_dir / f"{ckpt_prefix}_final.pt")
         print("Training complete.")
 
 

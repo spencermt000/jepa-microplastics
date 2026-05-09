@@ -52,4 +52,5 @@ paths:
   data_dir: processed/pretrain
   metadata_csv: processed/metadata.csv
   checkpoint_dir: checkpoints
+  checkpoint_prefix: focal
   log_dir: results/focal

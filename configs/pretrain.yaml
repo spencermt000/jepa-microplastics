@@ -50,4 +50,5 @@ mlflow:
 paths:
   data_dir: processed/pretrain
   checkpoint_dir: checkpoints
+  checkpoint_prefix: jepa
   log_dir: results/pretrain
