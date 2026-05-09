@@ -13,10 +13,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-try:
-    from torch.amp import GradScaler
-except ImportError:
-    from torch.cuda.amp import GradScaler
+from torch.cuda.amp import GradScaler  # works on 2.2 and 2.3+
 from torch.utils.data import DataLoader
 import yaml
 
@@ -111,10 +108,7 @@ def main():
         weight_decay=train_cfg["weight_decay"],
     )
     amp_enabled = train_cfg.get("amp", True) and device.type == "cuda"
-    try:
-        scaler = GradScaler("cuda", enabled=amp_enabled)
-    except TypeError:
-        scaler = GradScaler(enabled=amp_enabled)
+    scaler = GradScaler(enabled=amp_enabled)
 
     start_epoch = 0
     global_step = 0
