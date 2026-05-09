@@ -8,6 +8,7 @@ from src.embedding import Embedding
 from src.encoder import VitTinyEncoder, build_encoder
 from src.predictor import NarrowPredictor, build_predictor
 from src.masking import MaskConfig, Masks, sample_masks, build_mask_config
+from src.masking_focal import sample_focal_masks
 from src.utils.ema import EMA
 from src.utils.vicreg import vicreg_loss
 
@@ -36,6 +37,8 @@ class JEPA(nn.Module):
         predictor: NarrowPredictor,
         mask_cfg: MaskConfig,
         vicreg_cfg: Optional[dict] = None,
+        focal_masking: bool = False,
+        focal_bias_strength: float = 2.0,
     ):
         super().__init__()
         self.online_encoder = online_encoder
@@ -43,6 +46,8 @@ class JEPA(nn.Module):
         self.predictor = predictor
         self.mask_cfg = mask_cfg
         self.ema = EMA(online_encoder, target_encoder)
+        self.focal_masking = focal_masking
+        self.focal_bias_strength = focal_bias_strength
 
         self.vicreg_enabled = vicreg_cfg is not None and vicreg_cfg.get("enabled", False)
         self.vicreg_cfg = vicreg_cfg or {}
@@ -57,7 +62,11 @@ class JEPA(nn.Module):
         Returns JEPALoss with scalar .total for .backward().
         """
         B, device = images.shape[0], images.device
-        masks: Masks = sample_masks(B, self.num_patches, self.mask_cfg, device)
+        if self.focal_masking:
+            masks: Masks = sample_focal_masks(images, self.mask_cfg,
+                                              bias_strength=self.focal_bias_strength)
+        else:
+            masks: Masks = sample_masks(B, self.num_patches, self.mask_cfg, device)
 
         # --- Target encoder (no grad) ---
         with torch.no_grad():
@@ -140,4 +149,7 @@ def build_jepa(encoder_cfg: dict, predictor_cfg: dict, masking_cfg: dict, vicreg
     target = build_encoder(encoder_cfg)
     predictor = build_predictor(predictor_cfg, online.patch_embed.proj.out_channels, online.num_patches)
     mask_cfg = build_mask_config(masking_cfg)
-    return JEPA(online, target, predictor, mask_cfg, vicreg_cfg)
+    focal = masking_cfg.get("strategy", "random") == "focal"
+    bias = masking_cfg.get("bias_strength", 2.0)
+    return JEPA(online, target, predictor, mask_cfg, vicreg_cfg,
+                focal_masking=focal, focal_bias_strength=bias)

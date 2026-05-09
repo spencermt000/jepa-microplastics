@@ -1,0 +1,38 @@
+# ANCHOR — SimCLR contrastive baseline
+experiment: ANCHOR
+
+encoder:
+  arch: vit_tiny
+  patch_size: 16
+  img_size: 224
+  embed_dim: 192
+  depth: 12
+  num_heads: 3
+  dropout: 0.1
+
+projection:
+  hidden_dim: 512
+  out_dim: 128
+
+training:
+  epochs: 300
+  batch_size: 16
+  grad_accum_steps: 2
+  optimizer: adamw
+  lr: 1.5e-4
+  weight_decay: 0.05
+  warmup_epochs: 15
+  lr_schedule: cosine
+  temperature: 0.07
+  amp: true
+  checkpoint_every: 50
+  log_every: 10
+
+mlflow:
+  tracking_uri: "http://192.168.4.51:5000"
+  experiment_name: "anchor-simclr"
+
+paths:
+  metadata_csv: processed/metadata.csv
+  checkpoint_dir: checkpoints
+  log_dir: results/anchor

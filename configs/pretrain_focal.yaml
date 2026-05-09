@@ -1,0 +1,55 @@
+# FOCAL — I-JEPA with particle-aware block masking
+experiment: FOCAL
+
+encoder:
+  arch: vit_tiny
+  patch_size: 16
+  img_size: 224
+  embed_dim: 192
+  depth: 12
+  num_heads: 3
+  dropout: 0.1
+
+predictor:
+  depth: 4
+  embed_dim: 128
+  num_heads: 4
+
+masking:
+  strategy: focal              # focal | random
+  num_targets: 4
+  target_scale: [0.15, 0.2]
+  target_aspect: [0.75, 1.5]
+  context_scale: [0.85, 1.0]
+  bias_strength: 2.0           # how aggressively to prefer high-variance patches
+
+ema:
+  momentum_start: 0.996
+  momentum_end: 1.0
+  schedule: cosine
+
+training:
+  epochs: 300
+  batch_size: 16
+  grad_accum_steps: 2
+  optimizer: adamw
+  lr: 1.5e-4
+  weight_decay: 0.05
+  warmup_epochs: 15
+  lr_schedule: cosine
+  amp: true
+  checkpoint_every: 50
+  log_every: 10
+
+vicreg:
+  enabled: false
+
+mlflow:
+  tracking_uri: "http://192.168.4.51:5000"
+  experiment_name: "focal-jepa"
+
+paths:
+  data_dir: processed/pretrain
+  metadata_csv: processed/metadata.csv
+  checkpoint_dir: checkpoints
+  log_dir: results/focal
