@@ -13,7 +13,10 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from torch.amp import GradScaler, autocast
+try:
+    from torch.amp import GradScaler
+except ImportError:
+    from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader
 import yaml
 
@@ -107,7 +110,11 @@ def main():
         lr=train_cfg["lr"],
         weight_decay=train_cfg["weight_decay"],
     )
-    scaler = GradScaler("cuda", enabled=train_cfg.get("amp", True) and device.type == "cuda")
+    amp_enabled = train_cfg.get("amp", True) and device.type == "cuda"
+    try:
+        scaler = GradScaler("cuda", enabled=amp_enabled)
+    except TypeError:
+        scaler = GradScaler(enabled=amp_enabled)
 
     start_epoch = 0
     global_step = 0
@@ -159,7 +166,7 @@ def main():
 
                 lr = cosine_lr(optimizer, global_step, total_steps, train_cfg["lr"], warmup_steps)
 
-                with autocast(device.type, enabled=train_cfg.get("amp", True) and device.type == "cuda"):
+                with torch.autocast(device_type=device.type, enabled=amp_enabled):
                     loss_out = jepa(images)
                     loss = loss_out.total / grad_accum
 
