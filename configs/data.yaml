@@ -1,0 +1,36 @@
+sources:
+  peese:
+    local: raw_images/peese
+    repo: "https://github.com/PEESEgroup/Microplastic-Project"
+    type: github
+  kaggle_cv:
+    local: raw_images/kaggle_cv
+    dataset: "imtkaggleteam/microplastic-dataset-for-computer-vision"
+    type: kaggle
+  kaggle_mp:
+    local: raw_images/kaggle_mp
+    dataset: "sivajyothis/microplastic-dataset"
+    type: kaggle
+  holographic:
+    local: raw_images/holographic
+    repo: "https://github.com/ymzhu19eee/dataset_microplastics"
+    type: github
+
+processing:
+  img_size: 224
+  normalize:
+    use_imagenet: true  # fallback; compute per-dataset if false
+    imagenet_mean: [0.485, 0.456, 0.406]
+    imagenet_std: [0.229, 0.224, 0.225]
+
+splits:
+  pretrain: 1.0     # all images (labels stripped)
+  eval_kfold: 5     # k for stratified k-fold
+
+label_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 1.0]
+label_fraction_seeds: 5
+
+paths:
+  raw_root: raw_images
+  processed_root: processed
+  metadata_csv: processed/metadata.csv

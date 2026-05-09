@@ -1,0 +1,30 @@
+encoder:
+  arch: vit_tiny
+  patch_size: 16
+  img_size: 224
+  embed_dim: 192
+  depth: 12
+  num_heads: 3
+  frozen: true
+
+probe:
+  type: linear   # linear | mlp
+  hidden_dim: 512  # only used for mlp
+  dropout: 0.0
+
+training:
+  epochs: 100
+  batch_size: 64
+  optimizer: sgd
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 0.0
+  lr_schedule: cosine
+
+mlflow:
+  tracking_uri: "http://192.168.4.51:5000"
+  experiment_name: "jepa-microplastics-probe"
+
+paths:
+  checkpoint_dir: checkpoints
+  log_dir: results/probe

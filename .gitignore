@@ -1,0 +1,24 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# data — too large for git
+raw_images/
+processed/
+checkpoints/
+results/
+
+# secrets
+.env
+*.env
+
+# misc
+.DS_Store
+*.log
+mlruns/
+notebooks/.ipynb_checkpoints/
