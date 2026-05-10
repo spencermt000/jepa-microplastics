@@ -105,7 +105,7 @@ def main():
 
     params = list(model.encoder.parameters()) + list(model.projection_head.parameters())
     optimizer = torch.optim.AdamW(params, lr=train_cfg["lr"], weight_decay=train_cfg["weight_decay"])
-    scaler = GradScaler("cuda", enabled=train_cfg.get("amp", True) and device.type == "cuda")
+    scaler = GradScaler(enabled=train_cfg.get("amp", True) and device.type == "cuda")
 
     start_epoch = 0
     global_step = 0
