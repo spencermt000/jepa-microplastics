@@ -108,8 +108,8 @@ def run_probe(encoder, cfg, metadata, label_col, device, embed_dim):
             transform_val=eval_transform(),
         )):
             num_classes = len(train_ds.classes)
-            train_loader = DataLoader(train_ds, batch_size=64, shuffle=False, num_workers=2)
-            val_loader = DataLoader(val_ds, batch_size=64, shuffle=False, num_workers=2)
+            train_loader = DataLoader(train_ds, batch_size=64, shuffle=False, num_workers=0)
+            val_loader = DataLoader(val_ds, batch_size=64, shuffle=False, num_workers=0)
             train_feats, train_labels = extract_features(encoder, train_loader, device)
             val_feats, val_labels = extract_features(encoder, val_loader, device)
 
@@ -147,8 +147,8 @@ def run_label_efficiency(encoder, cfg, metadata, device, embed_dim):
                     transform_val=eval_transform(),
                 )
                 num_classes = len(train_ds.classes)
-                train_feats, train_labels = extract_features(encoder, DataLoader(train_ds, batch_size=64, num_workers=2), device)
-                val_feats, val_labels = extract_features(encoder, DataLoader(val_ds, batch_size=64, num_workers=2), device)
+                train_feats, train_labels = extract_features(encoder, DataLoader(train_ds, batch_size=64, num_workers=0), device)
+                val_feats, val_labels = extract_features(encoder, DataLoader(val_ds, batch_size=64, num_workers=0), device)
 
                 probe = LinearProbe(embed_dim, num_classes).to(device)
                 opt = torch.optim.SGD(probe.parameters(), lr=0.1, momentum=0.9)
@@ -227,7 +227,7 @@ def run_viz(encoder, cfg, metadata, device, out_dir, label_col="label_polymer"):
 
     loader = DataLoader(
         MicroplasticsDataset(labeled, label_col=label_col, transform=eval_transform()),
-        batch_size=64, shuffle=False, num_workers=2,
+        batch_size=64, shuffle=False, num_workers=0,
     )
     feats, labels = [], []
     with torch.no_grad():

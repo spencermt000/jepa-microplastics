@@ -16,8 +16,8 @@ projection:
 
 training:
   epochs: 300
-  batch_size: 16
-  grad_accum_steps: 2
+  batch_size: 32
+  grad_accum_steps: 1
   optimizer: adamw
   lr: 1.5e-4
   weight_decay: 0.05
@@ -30,7 +30,7 @@ training:
 
 mlflow:
   tracking_uri: "http://192.168.4.51:5000"
-  experiment_name: "anchor-simclr"
+  experiment_name: "anchor-simclr-v2"
 
 paths:
   metadata_csv: processed/metadata.csv

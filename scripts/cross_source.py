@@ -131,8 +131,8 @@ def main():
             train_ds.class_to_idx = class_to_idx
             val_ds.class_to_idx   = class_to_idx
 
-            train_loader = DataLoader(train_ds, batch_size=64, shuffle=False, num_workers=2)
-            val_loader   = DataLoader(val_ds,   batch_size=64, shuffle=False, num_workers=2)
+            train_loader = DataLoader(train_ds, batch_size=64, shuffle=False, num_workers=0)
+            val_loader   = DataLoader(val_ds,   batch_size=64, shuffle=False, num_workers=0)
 
             print(f"  Extracting features...")
             train_feats, train_labels = extract(encoder, train_loader, device)
