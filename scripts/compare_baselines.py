@@ -17,13 +17,14 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-ENCODER_ORDER = ["random", "imagenet", "dinov2", "supervised", "jepa"]
+ENCODER_ORDER = ["random", "imagenet", "dinov2", "supervised", "jepa_ep050", "jepa"]
 ENCODER_LABELS = {
     "random":     "Random Init (ViT-T)",
     "imagenet":   "ImageNet Sup. (ViT-T)",
     "dinov2":     "DINOv2 (ViT-S/14, 22M)",
     "supervised": "Supervised E2E (ViT-T)",
-    "jepa":       "I-JEPA (ViT-T, ours)",
+    "jepa_ep050": "I-JEPA ep050 (ViT-T, ours)",
+    "jepa":       "I-JEPA ep300 (ViT-T, ours)",
 }
 FRACTIONS = [0.01, 0.05, 0.10, 0.25, 0.50, 1.0]
 COLORS = {
@@ -31,6 +32,7 @@ COLORS = {
     "imagenet":   "#4c72b0",
     "dinov2":     "#dd8452",
     "supervised": "#55a868",
+    "jepa_ep050": "#e8a090",
     "jepa":       "#c44e52",
 }
 

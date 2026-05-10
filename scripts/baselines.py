@@ -327,21 +327,24 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--encoder", required=True, choices=["random", "imagenet", "dinov2", "supervised", "jepa"])
     parser.add_argument("--checkpoint", default="checkpoints/jepa_ep0300.pt", help="JEPA checkpoint (only for --encoder jepa)")
+    parser.add_argument("--name", default=None, help="Override CSV/MLflow name (default: encoder name)")
     parser.add_argument("--config", default="configs/probe.yaml")
     parser.add_argument("--metadata", default="processed/metadata.csv")
     parser.add_argument("--out_dir", default="results/baselines")
     args = parser.parse_args()
 
+    run_name = args.name or args.encoder
+
     cfg = load_cfg(args.config)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}  |  Encoder: {args.encoder}")
+    print(f"Device: {device}  |  Encoder: {args.encoder}  |  Name: {run_name}")
 
     metadata = load_metadata(args.metadata)
 
     mlflow.set_tracking_uri(cfg.get("mlflow", {}).get("tracking_uri", "http://192.168.4.51:5000"))
     mlflow.set_experiment("jepa-microplastics-baselines")
 
-    with mlflow.start_run(run_name=f"baseline-{args.encoder}"):
+    with mlflow.start_run(run_name=f"baseline-{run_name}"):
         mlflow.log_params({"encoder": args.encoder, "label_col": LABEL_COL,
                            "probe_epochs": PROBE_EPOCHS, "fractions": str(FRACTIONS)})
         if args.encoder == "dinov2":
@@ -356,13 +359,13 @@ def main():
             le_rows = run_label_efficiency(extractor, embed_dim, metadata, device)
 
         all_rows = probe_rows + le_rows
-        log_summary_to_mlflow(all_rows, args.encoder)
-        save_csv(all_rows, args.encoder, args.out_dir)
+        log_summary_to_mlflow(all_rows, run_name)
+        save_csv(all_rows, run_name, args.out_dir)
 
     # Print summary
     probe_accs = [r["accuracy"] for r in probe_rows]
     print(f"\n{'='*50}")
-    print(f"DONE — {args.encoder}")
+    print(f"DONE — {run_name}")
     print(f"  Probe CV mean acc: {statistics.mean(probe_accs):.4f}")
     print(f"  Label efficiency:")
     for frac in FRACTIONS:
