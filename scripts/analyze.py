@@ -243,13 +243,11 @@ def run_viz(encoder, cfg, metadata, device, out_dir, label_col="label_polymer"):
         proj = TSNE(n_components=2, perplexity=30, random_state=42).fit_transform(feats)
         tsne_path = out_dir / "tsne.png"
         _save_scatter(proj, labels, "t-SNE", tsne_path, classes)
-        mlflow.log_artifact(str(tsne_path))
 
         import umap as umap_lib
         proj_umap = umap_lib.UMAP(n_components=2, random_state=42).fit_transform(feats)
         umap_path = out_dir / "umap.png"
         _save_scatter(proj_umap, labels, "UMAP", umap_path, classes)
-        mlflow.log_artifact(str(umap_path))
 
         n_attn = 8
         sample_ds = MicroplasticsDataset(labeled.head(n_attn), label_col=label_col, transform=eval_transform())
@@ -257,7 +255,6 @@ def run_viz(encoder, cfg, metadata, device, out_dir, label_col="label_polymer"):
         attn_path = out_dir / "attention.png"
         try:
             _save_attention(encoder, images.to(device), attn_path)
-            mlflow.log_artifact(str(attn_path))
         except Exception as e:
             print(f"  Attention viz skipped: {e}")
 
