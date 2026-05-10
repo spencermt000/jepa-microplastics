@@ -50,20 +50,82 @@ class MicroplasticsDataset(Dataset):
         return img, -1
 
 
+def _peese_record(source_dir: Path, f: Path):
+    """Return (source, label_polymer) for a peese image based on subdataset structure."""
+    parts = f.relative_to(source_dir).parts
+    if not parts:
+        return "peese", None
+    top = parts[0]
+
+    if top == "CAM Target Dataset":
+        # peese/CAM Target Dataset/PE10|PS100|.../image
+        if len(parts) >= 2:
+            cls = parts[1].upper()
+            if cls.startswith("PE"):
+                return "peese_cam", "PE"
+            if cls.startswith("PS"):
+                return "peese_cam", "PS"
+        return "peese_cam", None
+
+    if top == "Geometric Properties Dataset":
+        # peese/Geometric Properties Dataset/Raw Image Data/PE10|.../image
+        if len(parts) >= 3:
+            cls = parts[2].upper()
+            if cls.startswith("PE"):
+                return "peese_gps", "PE"
+            if cls.startswith("PS"):
+                return "peese_gps", "PS"
+        return "peese_gps", None
+
+    if top == "Microplastic Image Dataset":
+        # peese/Microplastic Image Dataset/PE|PS/.../image
+        if len(parts) >= 2:
+            return "peese_mid", parts[1]
+        return "peese_mid", None
+
+    if top == "PS-PMMA":
+        # peese/PS-PMMA/PSPMMAdata/{conc polymer UV surfactant}/image
+        # e.g. "20 PS UV0 No" → PS; "0 0 UV0 Yes" → No-MP
+        if len(parts) >= 3 and parts[1] == "PSPMMAdata":
+            tokens = parts[2].split()
+            if len(tokens) >= 2:
+                polymer = tokens[1]
+                return "peese_pspmma", ("No-MP" if polymer == "0" else polymer)
+        return "peese_pspmma", None
+
+    return "peese", None
+
+
+def _holographic_polymer(source_dir: Path, f: Path):
+    """Extract polymer label for holographic images."""
+    # holographic/micro_plastic/{PE|PS|PHA|PE_with_dust|...}/image
+    parts = f.relative_to(source_dir).parts
+    if len(parts) >= 2:
+        base = parts[1].replace("_with_dust", "")
+        if base in {"PE", "PS", "PHA"}:
+            return base
+    return None
+
+
 def build_metadata(raw_root: str = "raw_images", out_csv: str = "processed/metadata.csv"):
-    """Scan raw_images/ and build metadata.csv."""
+    """Scan raw_images/ and build metadata.csv with per-subdataset polymer labels."""
     raw_root = Path(raw_root)
     records = []
     for source_dir in sorted(raw_root.iterdir()):
         if not source_dir.is_dir():
             continue
-        source = source_dir.name
+        top_source = source_dir.name
         for f in sorted(source_dir.rglob("*")):
             if f.suffix.lower() not in IMAGE_EXTENSIONS:
                 continue
-            # Infer labels from directory structure where possible
-            parts = f.relative_to(source_dir).parts
-            label_polymer = parts[0] if len(parts) > 1 else None
+            if top_source == "peese":
+                source, label_polymer = _peese_record(source_dir, f)
+            elif top_source == "holographic":
+                source = "holographic"
+                label_polymer = _holographic_polymer(source_dir, f)
+            else:
+                source = top_source
+                label_polymer = None
             records.append({
                 "path": str(f),
                 "source": source,
