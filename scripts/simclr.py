@@ -94,7 +94,7 @@ def main():
         dataset,
         batch_size=train_cfg["batch_size"],
         shuffle=True,
-        num_workers=min(4, os.cpu_count() or 1),
+        num_workers=0,
         pin_memory=(device.type == "cuda"),
         drop_last=True,
     )
@@ -105,7 +105,7 @@ def main():
 
     params = list(model.encoder.parameters()) + list(model.projection_head.parameters())
     optimizer = torch.optim.AdamW(params, lr=train_cfg["lr"], weight_decay=train_cfg["weight_decay"])
-    scaler = GradScaler(enabled=train_cfg.get("amp", True) and device.type == "cuda")
+    scaler = GradScaler("cuda", enabled=train_cfg.get("amp", True) and device.type == "cuda")
 
     start_epoch = 0
     global_step = 0
