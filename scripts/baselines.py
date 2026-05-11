@@ -360,7 +360,11 @@ def main():
 
         all_rows = probe_rows + le_rows
         log_summary_to_mlflow(all_rows, run_name)
-        save_csv(all_rows, run_name, args.out_dir)
+        csv_path = save_csv(all_rows, run_name, args.out_dir)
+        try:
+            mlflow.log_artifact(str(csv_path))
+        except Exception as e:
+            print(f"[warn] artifact upload skipped: {e}")
 
     # Print summary
     probe_accs = [r["accuracy"] for r in probe_rows]
