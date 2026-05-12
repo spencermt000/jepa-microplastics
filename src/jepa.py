@@ -114,16 +114,21 @@ class JEPA(nn.Module):
 
         total_jepa = total_jepa / len(masks.targets)
 
-        # --- Optional VICReg on predicted tokens ---
+        # --- Optional VICReg on encoder tokens + predicted tokens ---
         vicreg_term = None
         if self.vicreg_enabled:
+            std_coeff = self.vicreg_cfg.get("std_coeff", 25.0)
+            cov_coeff = self.vicreg_cfg.get("cov_coeff", 1.0)
+
+            # Predictor outputs — prevents predictor collapse
             flat_preds = torch.cat(all_preds, dim=1).flatten(0, 1)   # (B*N_total, D)
-            vicreg_term = vicreg_loss(
-                flat_preds,
-                sim_coeff=self.vicreg_cfg.get("sim_coeff", 25.0),
-                std_coeff=self.vicreg_cfg.get("std_coeff", 25.0),
-                cov_coeff=self.vicreg_cfg.get("cov_coeff", 1.0),
-            )
+            vr_pred = vicreg_loss(flat_preds, std_coeff=std_coeff, cov_coeff=cov_coeff)
+
+            # Online encoder patch tokens — prevents encoder collapse directly
+            enc_tokens = full_online.tokens[:, 1:, :].flatten(0, 1)  # (B*N_patches, D)
+            vr_enc = vicreg_loss(enc_tokens, std_coeff=std_coeff, cov_coeff=cov_coeff)
+
+            vicreg_term = vr_pred + vr_enc
 
         total = total_jepa + (vicreg_term if vicreg_term is not None else 0.0)
 
