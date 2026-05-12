@@ -81,6 +81,17 @@ def get_frozen_encoder(encoder_type, cfg, checkpoint, device):
             p.requires_grad_(False)
         return model, 192
 
+    elif encoder_type == "anchor":
+        model = build_encoder(cfg["encoder"]).to(device)
+        ckpt = torch.load(checkpoint, map_location=device)
+        model.load_state_dict(ckpt["encoder"])
+        model.eval()
+        for p in model.parameters():
+            p.requires_grad_(False)
+        def extract(images):
+            return model(images).tokens[:, 0, :]
+        return extract, 192
+
     elif encoder_type == "dinov2":
         model = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14", trust_repo=True).to(device)
         model.eval()
@@ -325,7 +336,7 @@ def log_summary_to_mlflow(rows, encoder):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--encoder", required=True, choices=["random", "imagenet", "dinov2", "supervised", "jepa"])
+    parser.add_argument("--encoder", required=True, choices=["random", "imagenet", "dinov2", "supervised", "jepa", "anchor"])
     parser.add_argument("--checkpoint", default="checkpoints/jepa_ep0300.pt", help="JEPA checkpoint (only for --encoder jepa)")
     parser.add_argument("--name", default=None, help="Override CSV/MLflow name (default: encoder name)")
     parser.add_argument("--config", default="configs/probe.yaml")
