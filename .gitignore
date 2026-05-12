@@ -11,7 +11,13 @@ build/
 raw_images/
 processed/
 checkpoints/
-results/
+
+# results: ignore large data files, but track the summary and archive provenance
+results/**/*.csv
+results/**/*.png
+results/**/*.pt
+results/**/*.jpg
+results/_archive/
 
 # secrets
 .env
@@ -22,3 +28,4 @@ results/
 *.log
 mlruns/
 notebooks/.ipynb_checkpoints/
+.claude/
