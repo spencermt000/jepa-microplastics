@@ -1,0 +1,52 @@
+encoder:
+  arch: vit_tiny
+  patch_size: 16
+  img_size: 224
+  embed_dim: 192
+  depth: 12
+  num_heads: 3
+  dropout: 0.1
+
+predictor:
+  depth: 4
+  embed_dim: 128
+  num_heads: 4
+
+masking:
+  num_targets: 4
+  target_scale: [0.15, 0.2]
+  target_aspect: [0.75, 1.5]
+  context_scale: [0.85, 1.0]
+
+ema:
+  momentum_start: 0.996
+  momentum_end: 1.0
+  schedule: cosine
+
+training:
+  epochs: 50
+  batch_size: 32
+  grad_accum_steps: 2
+  optimizer: adamw
+  lr: 1.5e-4
+  weight_decay: 0.05
+  warmup_epochs: 5
+  lr_schedule: cosine
+  amp: true
+  checkpoint_every: 10
+  log_every: 10
+
+vicreg:
+  enabled: true
+  std_coeff: 0.1
+  cov_coeff: 0.01
+
+mlflow:
+  tracking_uri: "http://192.168.4.51:5000"
+  experiment_name: "vicreg-jepa"
+
+paths:
+  metadata_csv: processed/metadata.csv
+  checkpoint_dir: checkpoints
+  checkpoint_prefix: vicreg_full
+  log_dir: results/vicreg_full
