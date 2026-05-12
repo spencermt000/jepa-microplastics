@@ -11,6 +11,7 @@ build/
 raw_images/
 processed/
 checkpoints/
+ZenodoDataDeposit/
 
 # results: ignore large data files, but track the summary and archive provenance
 results/**/*.csv

@@ -24,7 +24,7 @@ ema:
   schedule: cosine
 
 training:
-  epochs: 300
+  epochs: 150
   batch_size: 32
   grad_accum_steps: 2
   optimizer: adamw
