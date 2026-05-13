@@ -92,7 +92,7 @@ def main():
         dataset,
         batch_size=train_cfg["batch_size"],
         shuffle=True,
-        num_workers=min(4, os.cpu_count() or 1),
+        num_workers=0,
         pin_memory=(device.type == "cuda"),
         drop_last=True,
     )
