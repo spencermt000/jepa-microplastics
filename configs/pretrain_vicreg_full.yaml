@@ -24,16 +24,16 @@ ema:
   schedule: cosine
 
 training:
-  epochs: 50
-  batch_size: 32
-  grad_accum_steps: 2
+  epochs: 25
+  batch_size: 64
+  grad_accum_steps: 1
   optimizer: adamw
   lr: 1.5e-4
   weight_decay: 0.05
-  warmup_epochs: 5
+  warmup_epochs: 3
   lr_schedule: cosine
   amp: true
-  checkpoint_every: 10
+  checkpoint_every: 5
   log_every: 10
 
 vicreg:
